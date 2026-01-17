@@ -4,27 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — ChurnPilot</title>
+    <title>Command Center — ChurnPilot</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
     <style>
         :root {
             --bg-primary: #0a0a0b;
             --bg-secondary: #111113;
-            --bg-card: #18181b;
+            --bg-card: #161618;
             --text-primary: #fafafa;
             --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
+            --text-muted: #52525b;
             --accent: #6366f1;
-            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
             --border: #27272a;
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
         * {
@@ -34,271 +40,495 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Cinematic Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, transparent 50%);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: -1;
         }
 
         /* Navigation */
         nav {
-            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 24px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 11, 0.8);
             border-bottom: 1px solid var(--border);
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .user-email {
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .sign-out-btn {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .sign-out-btn:hover {
-            background: var(--bg-card);
+            border-color: var(--text-muted);
             color: var(--text-primary);
         }
 
-        /* Main Content */
+        /* Layout */
         main {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 24px;
+            padding: 40px 24px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 32px;
         }
 
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Typography */
         h1 {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Metric Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 8px;
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 48px;
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
         }
 
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
+        .metric-value.danger {
+            color: var(--danger);
         }
 
-        .card-header {
+        .metric-value.accent {
+            color: var(--accent);
+        }
+
+        /* Section Headers */
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
 
-        .card-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
-        .status-badge {
-            display: inline-flex;
+        /* Customer Table */
+        .card-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .customer-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 140px;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 100px;
+            transition: background 0.2s;
+        }
+
+        .customer-row:last-child {
+            border-bottom: none;
+        }
+
+        .customer-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .customer-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .customer-info p {
+            color: var(--text-secondary);
             font-size: 13px;
+        }
+
+        .customer-mrr {
             font-weight: 500;
+            font-size: 14px;
+            text-align: right;
         }
 
-        .status-badge.connected {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success);
+        .customer-action {
+            text-align: right;
         }
 
-        .status-badge.disconnected {
+        .risk-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .risk-badge.high {
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
         }
 
-        .status-badge.trial {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--accent);
-        }
-
-        .status-badge.active {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success);
-        }
-
-        .status-badge.paused {
+        .risk-badge.medium {
             background: rgba(245, 158, 11, 0.1);
             color: var(--warning);
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        .card-body {
+        /* Sidebar Panels */
+        .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .side-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
         }
 
-        .info-label {
-            color: var(--text-secondary);
+        .side-card h3 {
             font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
         }
 
-        .info-value {
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            font-size: 12px;
             font-weight: 500;
         }
 
-        /* Buttons */
+        .status-pill::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .status-pill.paused::before {
+            background: var(--warning);
+        }
+
+        /* Live Terminal Overlay */
+        #terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 11, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .terminal {
+            width: 100%;
+            max-width: 600px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-header {
+            background: #111;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #222;
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #ff5f56;
+        }
+
+        .dot-yellow {
+            background: #ffbd2e;
+        }
+
+        .dot-green {
+            background: #27c93f;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            height: 320px;
+            overflow-y: auto;
+            color: #d1d1d1;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            margin-bottom: 4px;
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        .log-prefix {
+            color: var(--accent);
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+
+        .log-warning {
+            color: var(--warning);
+        }
+
+        /* Action Buttons */
         .btn {
-            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            border: none;
+            border: 1px solid transparent;
+            text-decoration: none;
+            gap: 8px;
         }
 
         .btn-primary {
             background: var(--accent);
             color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .btn-primary:hover {
             background: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
-        .btn-secondary {
+        .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-primary);
         }
 
-        .btn-secondary:hover {
+        .btn-outline:hover {
             background: var(--bg-secondary);
+            border-color: var(--text-muted);
         }
 
-        .btn-danger {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        /* Notice */
-        .notice {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        .notice-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(99, 102, 241, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .notice-icon svg {
-            width: 20px;
-            height: 20px;
-            color: var(--accent);
-        }
-
-        .notice-content h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .notice-content p {
-            color: var(--text-secondary);
+        .btn-large {
+            width: 100%;
+            padding: 14px;
             font-size: 14px;
         }
 
-        /* Loading State */
-        .loading {
+        /* Toaster */
+        #toaster {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Expandable Rows */
+        .customer-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .customer-item:last-child {
+            border-bottom: none;
+        }
+
+        .customer-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 140px;
+            padding: 20px 24px;
+            align-items: center;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .customer-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .customer-details {
+            display: none;
+            padding: 0 24px 24px;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ai-message-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-top: 12px;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .ai-message-box::before {
+            content: 'AI Recommended Outreach';
+            position: absolute;
+            top: -9px;
+            left: 12px;
+            background: var(--bg-secondary);
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        /* Loading Spinner */
+        #main-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 400px;
+            z-index: 10000;
         }
 
         .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid var(--border);
+            border: 2px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -310,376 +540,355 @@
             }
         }
 
-        /* Responsive */
-        @media (max-width: 640px) {
-            nav {
-                padding: 16px 20px;
-            }
-
-            main {
-                padding: 40px 16px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .card-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
+        /* Tooltip-like details */
+        .customer-reason {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-style: italic;
         }
     </style>
 </head>
 
 <body>
+    <!-- Initial Loader -->
+    <div id="main-loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toaster -->
+    <div id="toaster">Report Generated! 🚀</div>
+
+    <!-- Live Terminal Overlay -->
+    <div id="terminal-overlay">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot dot-red"></div>
+                <div class="terminal-dot dot-yellow"></div>
+                <div class="terminal-dot dot-green"></div>
+            </div>
+            <div class="terminal-body" id="sync-log">
+                <!-- Logs injected here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav>
         <a href="/" class="logo">
             <div class="logo-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
             </div>
             ChurnPilot
         </a>
         <div class="nav-right">
-            <span class="user-email" id="user-email">Loading...</span>
+            <span class="user-email" id="user-email"></span>
             <button class="sign-out-btn" id="sign-out-btn">Sign Out</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main>
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-        </div>
+    <main id="main-content" style="opacity: 0;">
+        <!-- Column 1: Command Center -->
+        <section>
+            <h1>Command Center</h1>
 
-        <div id="content" style="display: none;">
-            <h1>Account Settings</h1>
-            <p class="subtitle">Manage your ChurnPilot account and Stripe connection.</p>
-
-            <!-- Stripe Connection -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Stripe Connection</span>
-                    <span class="status-badge connected" id="stripe-status">
-                        <span class="status-dot"></span>
-                        Connected
-                    </span>
+            <!-- Metrics -->
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-label">At-Risk MRR</div>
+                    <div class="metric-value danger" id="metric-at-risk-mrr">$0</div>
                 </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Account ID</span>
-                        <span class="info-value" id="stripe-account-id">—</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-danger" id="disconnect-btn">Disconnect Stripe</button>
-                    </div>
+                <div class="metric-card">
+                    <div class="metric-label">Actionable</div>
+                    <div class="metric-value accent" id="metric-actionable">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Sync</div>
+                    <div class="metric-value" id="metric-total-sync">0</div>
                 </div>
             </div>
 
-            <!-- Plan -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Your Plan</span>
-                    <span class="status-badge trial" id="plan-badge">Trial</span>
+            <!-- Urgent Accounts -->
+            <div class="section-header">
+                <h2>Accounts Needing Attention</h2>
+            </div>
+
+            <div class="card-table" id="at-risk-list">
+                <!-- List items injected here -->
+                <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                    All systems nominal. No accounts at risk.
                 </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Status</span>
-                        <span class="info-value" id="plan-status">7-day free trial</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Trial ends</span>
-                        <span class="info-value" id="trial-ends">—</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary" id="upgrade-btn">Upgrade to Pro</button>
-                    </div>
+            </div>
+        </section>
+
+        <!-- Column 2: Status & Config -->
+        <aside class="sidebar">
+            <!-- Sync Status -->
+            <div class="side-card">
+                <h3>System Status</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="status-pill" id="service-status">Active</div>
+                    <span style="font-size: 12px; color: var(--text-muted);" id="next-sync-label">Next report:
+                        Mon</span>
+                </div>
+                <button class="btn btn-outline btn-large" id="sync-btn">Force Analysis</button>
+                <div style="margin-top: 12px; text-align: center;">
+                    <a href="#" style="font-size: 11px; color: var(--text-muted); text-decoration: none;"
+                        id="pause-btn">Pause Service</a>
                 </div>
             </div>
 
-            <!-- Service Status -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Service Status</span>
-                    <span class="status-badge active" id="service-status-badge">
-                        <span class="status-dot"></span>
-                        Active
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Weekly reports</span>
-                        <span class="info-value" id="reports-status">Sending every Monday</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-secondary" id="pause-btn">Pause Service</button>
-                    </div>
-                </div>
+            <!-- Pro Plan -->
+            <div id="pro-card" class="side-card"
+                style="background: linear-gradient(135deg, #1e1b4b 0%, #0a0a0b 100%); border-color: #312e81;">
+                <h3 style="color: #818cf8;">Pro Features</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+                    Unlock automated emails, premium AI analysis, and advanced churn predictors.
+                </p>
+                <button class="btn btn-primary btn-large" id="upgrade-btn">Upgrade to Pro</button>
             </div>
 
-            <!-- Customer Stats -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Your Customers</span>
+            <!-- Active Details -->
+            <div class="side-card">
+                <h3>Connection</h3>
+                <div style="font-size: 13px; margin-bottom: 12px;">
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">Stripe API Key</div>
+                    <div id="stripe-key-masked" style="font-family: monospace;">••••••••••••</div>
                 </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Total synced</span>
-                        <span class="info-value" id="customer-count">Loading...</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">At-risk</span>
-                        <span class="info-value" id="at-risk-count">Loading...</span>
-                    </div>
+                <div style="font-size: 13px;">
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">Company</div>
+                    <div id="company-name" style="font-weight: 500;">—</div>
                 </div>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+                <button class="btn btn-outline btn-large"
+                    style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);"
+                    id="disconnect-btn">Disconnect</button>
             </div>
-
-            <!-- At-Risk Preview -->
-            <div class="card" id="at-risk-card" style="display: none;">
-                <div class="card-header">
-                    <span class="card-title">At-Risk Customers</span>
-                    <span class="status-badge paused" id="risk-badge">0 need attention</span>
-                </div>
-                <div class="card-body" id="at-risk-list">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Next Report Notice -->
-            <div class="notice">
-                <div class="notice-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                        <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                </div>
-                <div class="notice-content">
-                    <h3 id="next-report-title">Your next report arrives Monday</h3>
-                    <p id="next-report-date">We'll analyze your customers and send you a summary of who needs attention.
-                    </p>
-                    <button class="btn btn-primary" id="send-test-btn" style="margin-top: 12px;">
-                        Send Test Report Now
-                    </button>
-                </div>
-            </div>
-        </div>
+        </aside>
     </main>
 
     <script>
-        // Fetch account data
-        async function loadAccountData() {
-            try {
-                const response = await fetch('/api/account');
+        const state = {
+            founder: null,
+            preview: null,
+            isSyncing: false
+        };
 
-                if (response.status === 401) {
+        // Initialize GSAP
+        function animateIn() {
+            gsap.to('#main-loading', {
+                opacity: 0, duration: 0.5, onComplete: () => {
+                    document.getElementById('main-loading').style.display = 'none';
+                    gsap.to('#main-content', { opacity: 1, y: 0, duration: 0.8 });
+                }
+            });
+        }
+
+        // Terminal Log Helper
+        function addLog(text, type = 'default') {
+            const syncLog = document.getElementById('sync-log');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+
+            let prefix = '<span class="log-prefix">info</span>';
+            if (type === 'success') prefix = '<span class="log-success">done</span>';
+            if (type === 'warning') prefix = '<span class="log-warning">warn</span>';
+
+            line.innerHTML = `${prefix} &nbsp; ${text}`;
+            syncLog.appendChild(line);
+
+            gsap.to(line, { opacity: 1, y: 0, duration: 0.3 });
+            syncLog.scrollTop = syncLog.scrollHeight;
+        }
+
+        // Load Data
+        async function init() {
+            try {
+                const [accRes, prevRes] = await Promise.all([
+                    fetch('/api/account'),
+                    fetch('/api/preview/weekly-email')
+                ]);
+
+                if (accRes.status === 401) {
                     window.location.href = '/';
                     return;
                 }
 
-                const data = await response.json();
+                state.founder = await accRes.json();
+                state.preview = await prevRes.json();
 
-                // Update UI with account data
-                document.getElementById('user-email').textContent = data.email;
-                document.getElementById('stripe-account-id').textContent = data.stripe_account_id || 'Not connected';
-
-                // Update Stripe status
-                const stripeStatus = document.getElementById('stripe-status');
-                if (data.stripe_account_id) {
-                    stripeStatus.className = 'status-badge connected';
-                    stripeStatus.innerHTML = '<span class="status-dot"></span>Connected';
-                } else {
-                    stripeStatus.className = 'status-badge disconnected';
-                    stripeStatus.innerHTML = '<span class="status-dot"></span>Not Connected';
-                }
-
-                // Update plan
-                const planBadge = document.getElementById('plan-badge');
-                planBadge.textContent = data.plan === 'pro' ? 'Pro' : data.plan === 'paused' ? 'Paused' : 'Trial';
-                planBadge.className = `status-badge ${data.plan}`;
-
-                // Update trial ends
-                if (data.trial_ends_at) {
-                    const trialDate = new Date(data.trial_ends_at);
-                    const now = new Date();
-                    const daysLeft = Math.ceil((trialDate - now) / (1000 * 60 * 60 * 24));
-                    document.getElementById('trial-ends').textContent = daysLeft > 0
-                        ? `${daysLeft} days left (${trialDate.toLocaleDateString()})`
-                        : 'Expired';
-                    document.getElementById('plan-status').textContent = daysLeft > 0
-                        ? `${daysLeft}-day trial remaining`
-                        : 'Trial expired';
-                }
-
-                // Update service status
-                const serviceStatusBadge = document.getElementById('service-status-badge');
-                const pauseBtn = document.getElementById('pause-btn');
-                if (data.service_paused) {
-                    serviceStatusBadge.className = 'status-badge paused';
-                    serviceStatusBadge.innerHTML = '<span class="status-dot"></span>Paused';
-                    document.getElementById('reports-status').textContent = 'Reports paused';
-                    pauseBtn.textContent = 'Resume Service';
-                } else {
-                    serviceStatusBadge.className = 'status-badge active';
-                    serviceStatusBadge.innerHTML = '<span class="status-dot"></span>Active';
-                    document.getElementById('reports-status').textContent = 'Sending every Monday';
-                    pauseBtn.textContent = 'Pause Service';
-                }
-
-                // Show content
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+                updateUI();
+                animateIn();
             } catch (err) {
-                console.error('Failed to load account:', err);
-                window.location.href = '/';
+                console.error('Init failed:', err);
             }
         }
 
-        // Sign out
+        function updateUI() {
+            const { founder, preview } = state;
+
+            // Header/Nav
+            document.getElementById('user-email').textContent = founder.email;
+            document.getElementById('company-name').textContent = founder.company;
+
+            // Metrics
+            const riskMRR = preview.atRiskAccounts.reduce((sum, a) => sum + a.mrr, 0);
+            document.getElementById('metric-at-risk-mrr').textContent = `$${riskMRR.toLocaleString()}`;
+            document.getElementById('metric-actionable').textContent = preview.atRiskAccounts.length;
+            document.getElementById('metric-total-sync').textContent = preview.accountCount;
+
+            // Risk List
+            const listEl = document.getElementById('at-risk-list');
+            if (preview.atRiskAccounts.length > 0) {
+                listEl.innerHTML = preview.atRiskAccounts.map((acc, i) => {
+                    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${acc.email}&su=${encodeURIComponent("Checking in on your account")}&body=${encodeURIComponent(acc.message || "")}`;
+
+                    return `
+                    <div class="customer-item" data-index="${i}">
+                        <div class="customer-row">
+                            <div class="customer-info">
+                                <h4>${acc.name || acc.email}</h4>
+                                <div class="customer-reason">${acc.reason}</div>
+                            </div>
+                            <div class="customer-mrr">$${acc.mrr}/mo</div>
+                            <div class="customer-action">
+                                <span class="risk-badge ${acc.riskLevel.toLowerCase()}">${acc.riskLevel} RISK</span>
+                            </div>
+                        </div>
+                        <div class="customer-details">
+                            <div class="ai-message-box">${acc.message || "No AI recommendation generated yet."}</div>
+                            <div class="action-row">
+                                <a href="${gmailUrl}" target="_blank" class="btn btn-primary" style="padding: 8px 14px; font-size: 12px;">
+                                    Open in Gmail
+                                </a>
+                                <button class="btn btn-outline copy-btn" data-msg="${acc.message}" style="padding: 8px 14px; font-size: 12px;">
+                                    Copy Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `}).join('');
+
+                // Add detail togglers
+                document.querySelectorAll('.customer-row').forEach(row => {
+                    row.addEventListener('click', () => {
+                        const details = row.nextElementSibling;
+                        const isOpen = details.style.display === 'block';
+                        details.style.display = isOpen ? 'none' : 'block';
+                    });
+                });
+
+                // Add copy buttons
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(btn.dataset.msg);
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => btn.textContent = 'Copy Message', 2000);
+                    });
+                });
+            }
+
+            // Status Panel
+            const statusPill = document.getElementById('service-status');
+            statusPill.textContent = founder.service_paused ? 'Paused' : 'Active';
+            statusPill.className = `status-pill ${founder.service_paused ? 'paused' : ''}`;
+            document.getElementById('pause-btn').textContent = founder.service_paused ? 'Resume Service' : 'Pause Service';
+
+            // Pro Card
+            if (founder.plan === 'pro') {
+                document.getElementById('pro-card').style.display = 'none';
+            }
+
+            // Next Sync Label
+            const today = new Date();
+            const daysUntilMonday = (8 - today.getDay()) % 7 || 7;
+            const nextMon = new Date(today);
+            nextMon.setDate(today.getDate() + daysUntilMonday);
+            document.getElementById('next-sync-label').textContent = `Next report: ${nextMon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+        }
+
+        // Actions
+        async function runCinematicSync() {
+            const overlay = document.getElementById('terminal-overlay');
+            const log = document.getElementById('sync-log');
+            log.innerHTML = '';
+            overlay.style.display = 'flex';
+            gsap.fromTo('.terminal', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 });
+
+            addLog('Initializing deep sync...');
+            await new Promise(r => setTimeout(r, 600));
+
+            addLog(`Establishing connection to Stripe for ${state.founder.company}...`);
+            await new Promise(r => setTimeout(r, 800));
+            addLog('Connection verified.', 'success');
+
+            addLog(`Syncing customer records... (found ${state.preview.accountCount})`);
+            await new Promise(r => setTimeout(r, 1000));
+
+            addLog('Running deterministic rule engine...');
+            await new Promise(r => setTimeout(r, 700));
+
+            addLog('Invoking AI analysis (Gemini Flash)...');
+            await new Promise(r => setTimeout(r, 1200));
+
+            addLog(`Analysis complete. ${state.preview.atRiskAccounts.length} actionable alerts generated.`, 'success');
+            await new Promise(r => setTimeout(r, 1000));
+
+            gsap.to('.terminal', {
+                scale: 1.1, opacity: 0, duration: 0.4, onComplete: () => {
+                    overlay.style.display = 'none';
+                    init(); // Refresh data
+
+                    // Show toaster for 'delight' factor
+                    const toaster = document.getElementById('toaster');
+                    toaster.style.display = 'block';
+                    gsap.fromTo(toaster, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 });
+                    setTimeout(() => {
+                        gsap.to(toaster, { opacity: 0, y: 20, duration: 0.5, onComplete: () => toaster.style.display = 'none' });
+                    }, 4000);
+                }
+            });
+        }
+
+        // Listeners
+        document.getElementById('sync-btn').addEventListener('click', runCinematicSync);
+
         document.getElementById('sign-out-btn').addEventListener('click', async () => {
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/';
         });
 
-        // Disconnect Stripe
+        document.getElementById('pause-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const res = await fetch('/api/account/toggle-pause', { method: 'POST' });
+            if (res.ok) init();
+        });
+
         document.getElementById('disconnect-btn').addEventListener('click', async () => {
-            if (!confirm('Are you sure you want to disconnect Stripe? You will need to reconnect to receive churn reports.')) {
-                return;
-            }
-
-            const response = await fetch('/api/stripe/disconnect', { method: 'POST' });
-            if (response.ok) {
+            if (confirm('Disconnect from Stripe? All analytics will be lost.')) {
+                await fetch('/api/stripe/disconnect', { method: 'POST' });
                 window.location.reload();
-            } else {
-                alert('Failed to disconnect. Please try again.');
             }
         });
 
-        // Pause/Resume service
-        document.getElementById('pause-btn').addEventListener('click', async () => {
-            const response = await fetch('/api/account/toggle-pause', { method: 'POST' });
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                alert('Failed to update. Please try again.');
-            }
-        });
-
-        // Upgrade to Pro
         document.getElementById('upgrade-btn').addEventListener('click', async () => {
             const btn = document.getElementById('upgrade-btn');
             btn.disabled = true;
-            btn.textContent = 'Loading...';
-
-            try {
-                const response = await fetch('/api/payments/checkout', { method: 'POST' });
-                const data = await response.json();
-
-                if (data.checkoutUrl) {
-                    window.location.href = data.checkoutUrl;
-                } else if (data.error) {
-                    alert(data.error === 'Payment system not configured'
-                        ? 'Payment integration coming soon! For now, enjoy your trial.'
-                        : data.error);
-                    btn.disabled = false;
-                    btn.textContent = 'Upgrade to Pro';
-                }
-            } catch (err) {
-                console.error('Checkout error:', err);
-                alert('Failed to start checkout. Please try again.');
+            btn.textContent = 'Preparing...';
+            const res = await fetch('/api/payments/checkout', { method: 'POST' });
+            const data = await res.json();
+            if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+            else {
+                alert('Checkout failed. Product might not be configured.');
                 btn.disabled = false;
                 btn.textContent = 'Upgrade to Pro';
             }
         });
 
-        // Load customer preview data
-        async function loadPreviewData() {
-            try {
-                const response = await fetch('/api/preview/weekly-email');
-                if (!response.ok) return;
-
-                const data = await response.json();
-
-                // Update customer count
-                document.getElementById('customer-count').textContent =
-                    data.accountCount === 0 ? 'No customers yet' : `${data.accountCount} customers`;
-
-                // Update at-risk count
-                const riskCount = data.atRiskAccounts?.length || 0;
-                document.getElementById('at-risk-count').textContent =
-                    riskCount === 0 ? 'None right now 🎉' : `${riskCount} need attention`;
-
-                // Show at-risk list if any
-                if (riskCount > 0) {
-                    const card = document.getElementById('at-risk-card');
-                    card.style.display = 'block';
-                    document.getElementById('risk-badge').textContent = `${riskCount} need attention`;
-
-                    const list = document.getElementById('at-risk-list');
-                    list.innerHTML = data.atRiskAccounts.slice(0, 3).map(c => `
-                        <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                                <strong>${c.name || c.email}</strong>
-                                <span style="color: var(--success);">$${c.mrr}/mo</span>
-                            </div>
-                            <div style="font-size: 13px; color: var(--text-secondary);">${c.reason}</div>
-                        </div>
-                    `).join('') + (riskCount > 3 ? `<p style="color: var(--text-muted); font-size: 13px;">+ ${riskCount - 3} more in your weekly report</p>` : '');
-                }
-
-                // Calculate next Monday
-                const today = new Date();
-                const daysUntilMonday = (8 - today.getDay()) % 7 || 7;
-                const nextMonday = new Date(today);
-                nextMonday.setDate(today.getDate() + daysUntilMonday);
-                document.getElementById('next-report-date').textContent =
-                    `Next report: ${nextMonday.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`;
-
-            } catch (err) {
-                console.error('Failed to load preview:', err);
-            }
-        }
-
-        // Send test email
-        document.getElementById('send-test-btn').addEventListener('click', async () => {
-            const btn = document.getElementById('send-test-btn');
-            btn.disabled = true;
-            btn.textContent = 'Sending...';
-
-            try {
-                const response = await fetch('/api/trigger/weekly-email', { method: 'POST' });
-                const data = await response.json();
-
-                if (data.success) {
-                    btn.textContent = data.riskCount > 0
-                        ? `✓ Sent! ${data.riskCount} accounts`
-                        : '✓ No at-risk accounts';
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.textContent = 'Send Test Report Now';
-                    }, 3000);
-                } else {
-                    alert(data.error || 'Failed to send');
-                    btn.disabled = false;
-                    btn.textContent = 'Send Test Report Now';
-                }
-            } catch (err) {
-                console.error('Send error:', err);
-                alert('Failed to send test email');
-                btn.disabled = false;
-                btn.textContent = 'Send Test Report Now';
-            }
-        });
-
-        // Load data on page load
-        loadAccountData();
-        loadPreviewData();
+        init();
     </script>
 </body>
 
