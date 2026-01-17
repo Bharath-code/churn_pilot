@@ -24,6 +24,9 @@ app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOStri
 // Landing page
 app.get('/', serveStatic({ path: './public/index.html' }));
 
+// Audit page (Lead Magnet)
+app.get('/audit', serveStatic({ path: './public/audit.html' }));
+
 // Signup with Stripe API key (TrustMRR style)
 app.post('/api/signup', async (c) => {
   try {
@@ -90,6 +93,50 @@ app.post('/api/signup', async (c) => {
   } catch (err) {
     console.error('Signup error:', err);
     return c.json({ error: 'Failed to create account' }, 500);
+  }
+});
+
+// ============================================
+// One-Time Risk Audit (Lead Magnet - Public)
+// ============================================
+app.post('/api/audit', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { email, stripe_api_key, company } = body;
+
+    // Validate required fields
+    if (!email || !stripe_api_key) {
+      return c.json({ error: 'Email and Stripe API key are required' }, 400);
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return c.json({ error: 'Invalid email format' }, 400);
+    }
+
+    // Validate API key format
+    if (!stripe_api_key.match(/^(rk_live_|rk_test_|sk_live_|sk_test_)/)) {
+      return c.json({ error: 'Invalid Stripe API key format' }, 400);
+    }
+
+    // Run audit
+    const { runAudit } = await import('./core/email/audit.js');
+    const result = await runAudit(email, stripe_api_key, company);
+
+    if (!result.success) {
+      return c.json({ error: result.error }, 400);
+    }
+
+    return c.json({
+      success: true,
+      atRiskCount: result.atRiskCount,
+      mrrAtRisk: result.totalMrrAtRisk,
+      message: `Audit sent! Check ${email} for your report.`,
+    });
+  } catch (err) {
+    console.error('Audit error:', err);
+    return c.json({ error: 'Failed to run audit' }, 500);
   }
 });
 

@@ -19,3 +19,4 @@ dist/
 
 docs/
 .agent
+*.sql
