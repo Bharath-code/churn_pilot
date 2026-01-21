@@ -1,10 +1,8 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  // Supabase
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  // Convex
+  CONVEX_URL: z.string().url().default('http://localhost:3210'),
 
   // Stripe OAuth (optional - only needed for legacy OAuth flow)
   STRIPE_CLIENT_ID: z.string().startsWith('ca_').optional(),
@@ -24,7 +22,7 @@ const envSchema = z.object({
   // DodoPayments
   DODO_API_KEY: z.string().optional(),
   DODO_WEBHOOK_SECRET: z.string().optional(),
-  DODO_PRODUCT_ID: z.string().optional(), // Pro subscription product ID
+  DODO_PRODUCT_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

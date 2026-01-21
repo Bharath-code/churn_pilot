@@ -1,4 +1,23 @@
-import type { Account } from '../../lib/supabase.js';
+/**
+ * Account type for rule evaluation (Convex format with _id)
+ */
+export interface Account {
+  _id: string;
+  founder_id: string;
+  email: string;
+  name: string | null;
+  mrr: number;
+  last_active_at: string | null;
+  activated: boolean;
+  core_used: boolean;
+  usage_freq: 'DAILY' | 'WEEKLY';
+  billing_status: 'ACTIVE' | 'PAYMENT_FAILED' | 'CANCELING' | 'CANCELED';
+  cancel_at_period_end: boolean;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Risk levels for accounts

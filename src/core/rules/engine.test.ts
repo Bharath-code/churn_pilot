@@ -1,18 +1,15 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import type { Account } from '../../lib/supabase.js';
 import { evaluateAccount } from './engine.js';
+import type { Account } from './types.js';
 
-/**
- * Helper to create a test account with defaults
- */
 function createAccount(overrides: Partial<Account> = {}): Account {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
   return {
-    id: 'test-account-1',
+    _id: 'test-account-1',
     founder_id: 'test-founder-1',
     email: 'customer@example.com',
     name: 'Test Customer',

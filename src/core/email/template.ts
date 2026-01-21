@@ -1,5 +1,5 @@
-import type { Account } from '../../lib/supabase.js';
 import type { GenerationResult } from '../ai/generate.js';
+import type { Account } from '../rules/types.js';
 import type { RuleResult } from '../rules/types.js';
 
 /**

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { z } from 'zod';
 import { config } from '../../config.js';
-import type { Account } from '../../lib/supabase.js';
+import type { Account } from '../rules/types.js';
 import type { RuleResult } from '../rules/types.js';
 import { getFallback } from './fallback.js';
 import { SYSTEM_PROMPT, buildUserPrompt, containsBannedWords } from './prompt.js';

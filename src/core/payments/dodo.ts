@@ -1,15 +1,9 @@
 import DodoPayments from 'dodopayments';
 import { config } from '../../config.js';
-import { supabase } from '../../lib/supabase.js';
+import { api, convex } from '../../lib/convex.js';
 
-/**
- * DodoPayments client for subscription management
- */
 const client = config.DODO_API_KEY ? new DodoPayments({ bearerToken: config.DODO_API_KEY }) : null;
 
-/**
- * Create a checkout session for upgrading to Pro
- */
 export async function createCheckoutSession(
   founderId: string,
   email: string,
@@ -51,45 +45,40 @@ export async function createCheckoutSession(
   }
 }
 
-/**
- * Handle DodoPayments webhook events
- */
 export async function handleWebhookEvent(
   eventType: string,
   payload: Record<string, unknown>,
 ): Promise<void> {
   console.log('DodoPayments webhook:', eventType, payload);
 
+  const metadata = payload.metadata as Record<string, string> | undefined;
+  const founderId = metadata?.founder_id;
+
+  if (!founderId) {
+    console.warn('No founder_id in webhook metadata');
+    return;
+  }
+
   switch (eventType) {
     case 'payment.succeeded':
     case 'subscription.active': {
-      // Extract founder ID from metadata
-      const metadata = payload.metadata as Record<string, string> | undefined;
-      const founderId = metadata?.founder_id;
+      await convex.mutation(api.founders.updateFounder, {
+        id: founderId,
+        updates: { plan: 'pro' },
+      });
 
-      if (founderId) {
-        // Upgrade founder to Pro
-        await supabase.from('founders').update({ plan: 'pro' }).eq('id', founderId);
-
-        console.log(`Upgraded founder ${founderId} to Pro`);
-      }
+      console.log(`Upgraded founder ${founderId} to Pro`);
       break;
     }
 
     case 'subscription.canceled':
     case 'subscription.expired': {
-      const metadata = payload.metadata as Record<string, string> | undefined;
-      const founderId = metadata?.founder_id;
+      await convex.mutation(api.founders.updateFounder, {
+        id: founderId,
+        updates: { plan: 'paused', service_paused: true },
+      });
 
-      if (founderId) {
-        // Downgrade to paused
-        await supabase
-          .from('founders')
-          .update({ plan: 'paused', service_paused: true })
-          .eq('id', founderId);
-
-        console.log(`Paused founder ${founderId} due to subscription end`);
-      }
+      console.log(`Paused founder ${founderId} due to subscription end`);
       break;
     }
 
@@ -98,17 +87,11 @@ export async function handleWebhookEvent(
   }
 }
 
-/**
- * Verify webhook signature (simplified - use proper HMAC in production)
- */
 export function verifyWebhookSignature(_payload: string, _signature: string): boolean {
-  // For now, just check if secret is configured
-  // In production, implement proper HMAC verification
   if (!config.DODO_WEBHOOK_SECRET) {
     console.warn('Webhook secret not configured, skipping verification');
     return true;
   }
 
-  // TODO: Implement proper signature verification
   return true;
 }

@@ -1,50 +1,50 @@
-import type { Account } from '../../lib/supabase.js';
 import type { GenerationResult } from '../ai/generate.js';
+import type { Account } from '../rules/types.js';
 import type { RuleResult } from '../rules/types.js';
 
 /**
  * Risk level badge
  */
 function riskBadge(level: string): string {
-    switch (level) {
-        case 'HIGH':
-            return '🔴';
-        case 'MEDIUM':
-            return '🟡';
-        default:
-            return '🟢';
-    }
+  switch (level) {
+    case 'HIGH':
+      return '🔴';
+    case 'MEDIUM':
+      return '🟡';
+    default:
+      return '🟢';
+  }
 }
 
 export interface AuditCustomer {
-    account: Account;
-    result: RuleResult;
-    recommendation: GenerationResult;
+  account: Account;
+  result: RuleResult;
+  recommendation: GenerationResult;
 }
 
 export interface AuditData {
-    email: string;
-    company?: string;
-    customers: AuditCustomer[];
-    totalMrrAtRisk: number;
-    atRiskCount: number;
-    generatedAt: Date;
+  email: string;
+  company?: string;
+  customers: AuditCustomer[];
+  totalMrrAtRisk: number;
+  atRiskCount: number;
+  generatedAt: Date;
 }
 
 /**
  * Generate subject line for audit email
  */
 export function generateAuditSubject(mrrAtRisk: number): string {
-    return `Your ChurnPilot Audit: $${mrrAtRisk.toLocaleString()} MRR at Risk`;
+  return `Your ChurnPilot Audit: $${mrrAtRisk.toLocaleString()} MRR at Risk`;
 }
 
 /**
  * Generate HTML email content for one-time audit
  */
 export function generateAuditHtml(data: AuditData): string {
-    const subscribeUrl = 'https://churnpilot.com/#signup';
+  const subscribeUrl = 'https://churnpilot.com/#signup';
 
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -77,10 +77,10 @@ export function generateAuditHtml(data: AuditData): string {
       </h2>
 
       ${data.customers
-            .filter((c) => c.result.riskLevel !== 'HEALTHY')
-            .slice(0, 3)
-            .map(
-                (c, _i) => `
+        .filter((c) => c.result.riskLevel !== 'HEALTHY')
+        .slice(0, 3)
+        .map(
+          (c, _i) => `
         <div style="margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${c.result.riskLevel === 'HIGH' ? '#ef4444' : '#eab308'};">
           <h3 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #1a1a1a;">
             ${riskBadge(c.result.riskLevel)} ${c.account.name || c.account.email} — $${c.account.mrr}/mo
@@ -90,28 +90,30 @@ export function generateAuditHtml(data: AuditData): string {
             <strong>Why:</strong> ${c.recommendation.explanation}
           </p>
           
-          ${c.recommendation.message
-                        ? `
+          ${
+            c.recommendation.message
+              ? `
             <div style="background: #fff; border-left: 3px solid #6366f1; padding: 10px 14px; margin-top: 10px; border-radius: 0 4px 4px 0;">
               <p style="margin: 0 0 4px 0; font-size: 12px; color: #666; font-weight: 500;">Copy-paste this:</p>
               <p style="margin: 0; color: #1a1a1a; font-size: 14px;">"${c.recommendation.message}"</p>
             </div>
           `
-                        : ''
-                    }
+              : ''
+          }
         </div>
       `,
-            )
-            .join('')}
+        )
+        .join('')}
 
-      ${data.atRiskCount > 3
-            ? `
+      ${
+        data.atRiskCount > 3
+          ? `
         <p style="margin: 0 0 24px 0; color: #666; font-size: 14px; text-align: center;">
           + ${data.atRiskCount - 3} more accounts at risk...
         </p>
       `
-            : ''
-        }
+          : ''
+      }
 
       <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
 
@@ -143,31 +145,31 @@ export function generateAuditHtml(data: AuditData): string {
  * Generate plain text version of audit email
  */
 export function generateAuditText(data: AuditData): string {
-    let text = `YOUR CHURNPILOT AUDIT\n\n`;
-    text += `$${data.totalMrrAtRisk.toLocaleString()} MRR at Risk\n`;
-    text += `${data.atRiskCount} ${data.atRiskCount === 1 ? 'account needs' : 'accounts need'} your attention.\n\n`;
-    text += `---\n\n`;
-    text += `HERE'S WHO TO REACH OUT TO:\n\n`;
+  let text = `YOUR CHURNPILOT AUDIT\n\n`;
+  text += `$${data.totalMrrAtRisk.toLocaleString()} MRR at Risk\n`;
+  text += `${data.atRiskCount} ${data.atRiskCount === 1 ? 'account needs' : 'accounts need'} your attention.\n\n`;
+  text += `---\n\n`;
+  text += `HERE'S WHO TO REACH OUT TO:\n\n`;
 
-    data.customers
-        .filter((c) => c.result.riskLevel !== 'HEALTHY')
-        .slice(0, 3)
-        .forEach((c, i) => {
-            text += `${i + 1}) ${c.account.name || c.account.email} — $${c.account.mrr}/mo\n`;
-            text += `Why: ${c.recommendation.explanation}\n`;
-            if (c.recommendation.message) {
-                text += `Message: "${c.recommendation.message}"\n`;
-            }
-            text += '\n';
-        });
+  data.customers
+    .filter((c) => c.result.riskLevel !== 'HEALTHY')
+    .slice(0, 3)
+    .forEach((c, i) => {
+      text += `${i + 1}) ${c.account.name || c.account.email} — $${c.account.mrr}/mo\n`;
+      text += `Why: ${c.recommendation.explanation}\n`;
+      if (c.recommendation.message) {
+        text += `Message: "${c.recommendation.message}"\n`;
+      }
+      text += '\n';
+    });
 
-    if (data.atRiskCount > 3) {
-        text += `+ ${data.atRiskCount - 3} more accounts at risk...\n\n`;
-    }
+  if (data.atRiskCount > 3) {
+    text += `+ ${data.atRiskCount - 3} more accounts at risk...\n\n`;
+  }
 
-    text += `---\n\n`;
-    text += `GET THIS REPORT EVERY WEEK\n`;
-    text += `Subscribe at https://churnpilot.com — $79/mo\n`;
+  text += `---\n\n`;
+  text += `GET THIS REPORT EVERY WEEK\n`;
+  text += `Subscribe at https://churnpilot.com — $79/mo\n`;
 
-    return text;
+  return text;
 }
